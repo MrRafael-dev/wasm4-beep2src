@@ -117,6 +117,12 @@ impl Track {
             tones     : tones,
         };
     }
+    
+    /// Resets the track back to beginning.
+    pub fn reset(&mut self) {
+        self.next = 0;
+        self.wait = 0;
+    }
 
     /// Event responsible for controlling music execution.
     pub fn step(&mut self) {
