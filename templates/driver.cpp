@@ -26,13 +26,17 @@ uint32_t trackNotes[60] = {
 
 // Instruments available for use.
 uint32_t trackInstruments[][2] = {
+
+	// Channel 2.
 	{2, 0}, // Triangle
 	
+	// Channel 0.
 	{0, 2}, // Square
 	{0, 3}, // Pulse wide
 	{0, 1}, // Pulse narrow
 	{0, 0}, // Sawtooth
 	
+	// Channel 1.
 	{1, 2}, // Square
 	{1, 3}, // Pulse wide
 	{1, 1}, // Pulse narrow

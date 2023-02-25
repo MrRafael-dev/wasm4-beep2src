@@ -58,11 +58,21 @@ const TRACK_NOTES: [u16; 37] = [
 
 /// Instruments available for use.
 const TRACK_INSTRUMENTS: [(u32, u32); 5] = [
+	
+	// Channel 2.	
     (2, 0), // Triangle
+	
+	// Channel 0.	
     (0, 2), // Square
     (0, 3), // Pulse wide
     (0, 1), // Pulse narrow
-    (0, 0)  // Sawtooth
+    (0, 0),  // Sawtooth'
+	
+	// Channel 1.	
+    (1, 2), // Square
+    (1, 3), // Pulse wide
+    (1, 1), // Pulse narrow
+    (1, 0)  // Sawtooth
 ];
 
 /// Reserved for empty notes.
@@ -82,6 +92,8 @@ struct Track {
     ticks: u8,
     /// Instrument used by this track (see `TRACK_INSTRUMENTS`).
     instrument: u8,
+    /// Volume.
+    volume: u8,
     /// Variable Flags reserved for opcodes.
     flags: (u8,u8),
     /// Soundtrack tones.
@@ -95,6 +107,7 @@ impl Default for Track {
             wait      : 0,
             ticks     : 1,
             instrument: 0,
+            volume    : 100,
             flags     : (0,0),
             tones     : [(0, 255, 0); 32],
         };
@@ -113,6 +126,7 @@ impl Track {
             wait      : 0,
             ticks     : 1,
             instrument: 0,
+            volume    : 100,
             flags     : (0,0),
             tones     : tones,
         };
@@ -147,7 +161,7 @@ impl Track {
                         decay  : 0,
                         sustain: 0,
                         release: (wait * self.ticks) as u32,
-                        volume : 100,
+                        volume : self.volume,
                         channel: TRACK_INSTRUMENTS[instrument].0,
                         mode   : TRACK_INSTRUMENTS[instrument].1,
                     }
