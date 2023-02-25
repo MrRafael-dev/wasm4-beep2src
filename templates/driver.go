@@ -40,11 +40,21 @@ var TrackNotes = [37]uint16{
 
 // Instruments available for use.
 var TrackInstruments = [5][2]uint32{
+	
+	// Channel 2.
 	{2, 0}, // Triangle
+
+	// Channel 0.
 	{0, 2}, // Square
 	{0, 3}, // Pulse wide
 	{0, 1}, // Pulse narrow
 	{0, 0}, // Sawtooth
+	
+	// Channel 1.	
+	{1, 2}, // Square
+	{1, 3}, // Pulse wide
+	{1, 1}, // Pulse narrow
+	{1, 0}, // Sawtooth
 }
 
 // Reserved for empty notes.
@@ -59,6 +69,7 @@ type Track struct {
 	wait       uint16
 	ticks      uint8
 	instrument uint8
+	volume     uint8
 	flags      [2]uint8
 	tones      [][3]byte
 }
@@ -92,7 +103,7 @@ func (self *Track) Step() {
 				decay:   0,
 				sustain: 0,
 				release: uint32(wait * self.ticks),
-				volume:  100,
+				volume:  self.volume,
 				channel: TrackInstruments[instrument][0],
 				mode:    TrackInstruments[instrument][1],
 			})
