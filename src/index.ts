@@ -1,3 +1,5 @@
+//#region <beepbox.ts>
+
 /**
  * @interface ExportPoint
  * 
@@ -136,6 +138,219 @@ export interface ExportData {
 	channels: ExportChannel[];
 }
 
+/** Song scales. */
+const SONG_SCALES: string[] = [
+	"easy :)",
+	"easy :(",
+	"island :)",
+	"island :(",
+	"blues :)",
+	"blues :(",
+	"normal :)",
+	"normal :(",
+	"dbl harmonic :)",
+	"dbl harmonic :(",
+	"enigma",
+	"expert",
+];
+
+/** Song keys. */
+const SONG_KEYS: string[] = [
+	"B",
+	"A♯",
+	"A",
+	"G♯",
+	"G",
+	"F♯",
+	"F",
+	"E",
+	"D♯",
+	"D",
+	"C♯",
+	"C",
+];
+
+/** Channel types. */
+const CHANNEL_TYPES: string[] = [
+	"pitch",
+	"drum",
+];
+
+/** Instrument types. */
+const INSTRUMENT_TYPES: string[] = [
+	"chip",
+	"FM",
+];
+
+/** Instrument waves. */
+const INSTRUMENT_WAVES: string[] = [
+	"triangle",
+	"square",
+	"pulse wide",
+	"pulse narrow",
+	"sawtooth",
+	"double saw",
+	"double pulse",
+	"spiky",
+	"plateau",
+];
+
+/** Instrument transitions. */
+const INSTRUMENT_TRANSITIONS: string[] = [
+	"seamless",
+	"sudden",
+	"smooth",
+	"slide",
+];
+
+/** Instrument filters. */
+const INSTRUMENT_FILTERS: string[] = [
+	"none",
+	"bright",
+	"medium",
+	"soft",
+	"decay bright",
+	"decay medium",
+	"decay soft",
+];
+
+/** Instrument choruses. */
+const INSTRUMENT_CHORUSES: string[] = [
+	"union",
+	"shimmer",
+	"hum",
+	"honky tonk",
+	"dissonant",
+	"fifths",
+	"octaves",
+	"bowed",
+	"custom harmony",
+];
+
+/** Instrument effects. */
+const INSTRUMENT_EFFECTS: string[] = [
+	"none",
+	"vibrato light",
+	"vibrato delayed",
+	"vibrato heavy",
+	"tremolo light",
+	"tremolo heavy",
+];
+
+/** Song scales. */
+export enum SongScale {
+	Null         = -1,
+	Easy1        =  0,
+	Easy2        =  1,
+	Island1      =  2,
+	Island2      =  3,
+	Blues1       =  4,
+	Blues2       =  5,
+	Normal1      =  6,
+	Normal2      =  7,
+	DBLHarmonic1 =  8,
+	DBLHarmonic2 =  9,
+	Enigma       = 10,
+	Expert       = 11,
+}
+
+/** Song keys. */
+export enum SongKey {
+	Null = -1,
+	B    =  0,
+	AS   =  1,
+	A    =  2,
+	GS   =  3,
+	G    =  4,
+	FS   =  5,
+	F    =  6,
+	E    =  7,
+	DS   =  8,
+	D    =  9,
+	CS   = 10,
+	C    = 11,
+}
+
+/** Channel types. */
+export enum ChannelType {
+	Null  = -1,
+	Pitch =  0,
+	Drum  =  1,
+}
+
+/** Instrument types. */
+export enum InstrumentType {
+	Null = -1,
+	Chip =  0,
+	FM   =  1,
+}
+
+/** Instrument waves. */
+export enum InstrumentWave {
+	Null        = -1,
+	Triangle    =  0,
+	Square      =  1,
+	PulseWide   =  2,
+	PulseNarrow =  3,
+	Sawtooth    =  4,
+	DoubleSaw   =  5,
+	DoublePulse =  6,
+	Spiky       =  7,
+	Plateau     =  8,
+}
+
+/** Instrument transitions. */
+export enum InstrumentTransition {
+	Null     = -1,
+	Seamless =  0,
+	Sudden   =  1,
+	Smooth   =  2,
+	Slide    =  3,
+}
+
+/** Instrument filters. */
+export enum InstrumentFilter {
+	Null        = -1,
+	None        =  0,
+	Bright      =  1,
+	Medium      =  2,
+	Soft        =  3,
+	DecayBright =  4,
+	DecayMedium =  5,
+	DecaySoft   =  6,
+}
+
+/** Instrument choruses. */
+export enum InstrumentChorus {
+	Null          = -1,
+	Union         =  0,
+	Shimmer       =  1,
+	Hum           =  2,
+	HonkyTonk     =  3,
+	Dissonant     =  4,
+	Fifhts        =  5,
+	Octaves       =  6,
+	Bowed         =  7,
+	CustomHarmony =  8,
+}
+
+/** Instrument effects. */
+export enum InstrumentEffect {
+	Null           = -1,
+	None           =  0,
+	VibratoLight   =  1,
+	VibratoDelayed =  2,
+	VibratoHeavy   =  3,
+	TremoloLight   =  4,
+	TremoloHeavy   =  5,
+}
+
+//#endregion <beepbox.ts>
+//#region </index.ts>
+
+/** Tone's ArrayBuffer size. */
+const TONE_BUFFER_SIZE: number = 3;
+
 /**
  * @class Tone
  * 
@@ -156,9 +371,26 @@ export class Tone {
 	duration: number;
 
 	/**
+	 * Create a new tone instance from an exported note data.
+	 * 
+	 * @param {ExportNote} data Exported note data.
+	 * 
+	 * @returns {Tone}
+	 */
+	static from(data: ExportNote): Tone {
+		const pitch   : number = data.pitches[0];
+		const start   : number = data.points[0].tick;
+		const end     : number = data.points[1].tick;
+		const duration: number = end - start;
+
+		// Create and return a tone:
+		const tone: Tone = new Tone(pitch, start, end, duration);
+		return tone;
+	}
+
+	/**
 	 * @constructor
 	 * 
-	 * @param {number} offset Track offset.
 	 * @param {number} pitch Tone pitch.
 	 * @param {number} start Tone starting point.
 	 * @param {number} end Tone ending point.
@@ -169,6 +401,31 @@ export class Tone {
 		this.start    = start;
 		this.end      = end;
 		this.duration = duration;
+	}
+
+	/**
+	 * Returns an binary representation of this object.
+	 * 
+	 * Data structure has a fixed size of 3 bytes.
+	 * Starting/ending points are not included.
+	 * ```
+	 * {
+	 *   start   : u8;
+	 *   pitch   : u8;
+	 *   duration: u8;
+	 * }
+	 * ```
+	 * 
+	 * @returns {ArrayBuffer}
+	 */
+	toArrayBuffer(): ArrayBuffer {
+		const array: Uint8Array = new Uint8Array([
+			this.start,
+			this.pitch,
+			this.duration,
+		]);
+
+		return array.buffer;
 	}
 }
 
@@ -183,12 +440,137 @@ export class Track {
 	tones: Tone[];
 
 	/**
+	 * Create a new track instance from an exported pattern data.
+	 * 
+	 * @param {ExportPattern} data Exported pattern data.
+	 * 
+	 * @returns {Track}
+	 */
+	static from(data: ExportPattern): Track {
+		// Create a track to be returned later, and get notes:
+		const track: Track = new Track();
+		const notes: ExportNote[] = data.notes;
+
+		// Loop through notes and create tones...
+		for(const note of notes) {
+			const tone: Tone = Tone.from(note);
+			track.tones.push(tone);
+		}
+
+		return track;
+	}
+
+	/**
 	 * @constructor
 	 * 
 	 * @param {Tone[]} tones Tones.
 	 */
 	constructor(tones: Tone[] = []) {
 		this.tones = tones;
+	}
+
+	/**
+	 * Returns an binary representation of this object.
+	 * 
+	 * Data structure has a dynamic size. At least 1 byte will be used to 
+	 * determine it's item length, proceeded by the items themselves, where
+	 * each `Tone` will always have 3 bytes.
+	 * ```
+	 * {
+	 *   length: u8;
+	 *   tones : Tone[]
+	 * }
+	 * ```
+	 * 
+	 * @returns {ArrayBuffer}
+	 */
+	toArrayBuffer(): ArrayBuffer {
+		// Declare a byte array and set the item length:
+		const size : number     = 1 + (this.tones.length * TONE_BUFFER_SIZE);
+		const array: Uint8Array = new Uint8Array(size);
+					array[0] = this.tones.length;
+
+		// Insertion offset:
+		let offset: number = 1;
+
+		// Iterate through tones...
+		for(const tone of this.tones) {
+			array.set(new Uint8Array(tone.toArrayBuffer()), offset);
+			offset += TONE_BUFFER_SIZE;
+		}
+
+		return array.buffer;
+	}
+}
+
+/**
+ * @class Instrument
+ * 
+ * @description
+ * Represents a channel's instrument.
+ */
+export class Instrument {
+	/** Instrument type. */
+	type: InstrumentType;
+
+	/** Instrument volume. */
+	volume: number;
+
+	/** Instrument wave. */
+	wave: InstrumentWave;
+
+	/** Instrument transition. */
+	transition: InstrumentTransition;
+
+	/** Instrument filter. */
+	filter: InstrumentFilter;
+
+	/** Instrument chorus. */
+	chorus: InstrumentChorus;
+
+	/** Instrument effect. */
+	effect: InstrumentEffect;
+
+	/**
+	 * Create a new instrument instance from an exported instrument data.
+	 * 
+	 * @param {ExportInstrument} data Exported instrument data.
+	 * 
+	 * @returns {Instrument}
+	 */
+	static from(data: ExportInstrument): Instrument {
+		// Create a instrument to be returned later:
+		const instrument: Instrument = new Instrument(
+			INSTRUMENT_TYPES.indexOf(data.type),
+			data.volume,
+			INSTRUMENT_WAVES.indexOf(data.wave),
+			INSTRUMENT_TRANSITIONS.indexOf(data.transition),
+			INSTRUMENT_CHORUSES.indexOf(data.chorus),
+			INSTRUMENT_EFFECTS.indexOf(data.effect)
+		);
+
+		return instrument;
+	}
+
+	/**
+	 * @constructor
+	 * 
+	 * @param {InstrumentType} type Instrument type.
+	 * @param {number} volume Instrument volume
+	 * @param {InstrumentWave} wave Instrument wave.
+	 * @param {InstrumentTransition} transition Instrument transition.
+	 * @param {InstrumentFilter} filter Instrument filter.
+	 * @param {InstrumentChorus} chorus Instrument chorus.
+	 * @param {InstrumentEffect} effect Instrument effect.
+	 */
+	constructor(type: InstrumentType = InstrumentType.Null, volume: number = 0, wave: InstrumentWave = InstrumentWave.Null, transition: InstrumentTransition = InstrumentTransition.Null, filter: InstrumentFilter = InstrumentFilter.Null, chorus: InstrumentChorus = InstrumentChorus.Null, effect: InstrumentEffect = InstrumentEffect.Null) {
+		this.type       = type;
+		this.volume     = volume;
+		this.wave       = wave;
+		this.transition = transition;
+		this.filter     = filter;
+		this.chorus     = chorus;
+		this.effect     = effect;
 	}
 }
 
@@ -201,7 +583,10 @@ export class Track {
  */
 export class Channel {
 	/** Channel type. */
-	type: string;
+	type: ChannelType;
+
+	/** Instrument. */
+	instrument: Instrument;
 
 	/** Tracks. */
 	tracks: Track[];
@@ -210,16 +595,53 @@ export class Channel {
 	sequence: number[];
 
 	/**
+	 * Create a new channel instance from an exported channel data.
+	 * 
+	 * @param {ExportChannel} data Exported channel data.
+	 * 
+	 * @returns {Channel}
+	 */
+	static from(data: ExportChannel): Channel {
+		// Create a channel to be returned later:
+		const channel: Channel = new Channel(
+			CHANNEL_TYPES.indexOf(data.type)
+		);
+
+		// Get instrument, if it exists...
+		if(data.instruments.length > 0) {
+			channel.instrument = Instrument.from(data.instruments[0]);
+		}
+
+		// Push sequence data to channel, they are being subtracted by one in order
+		// to match their respective track indexes...
+		for(const sequence of data.sequence) {
+			channel.sequence.push(sequence - 1);
+		}
+
+		// Channel patterns.
+		const patterns: ExportPattern[]  = data.patterns;
+
+		// Loop through patterns and create tracks...
+		for(const pattern of patterns) {
+			const track: Track = Track.from(pattern);
+			channel.tracks.push(track);
+		}
+
+		return channel;
+	}
+
+	/**
 	 * @constructor
 	 * 
-	 * @param {string} type Channel type.
+	 * @param {ChannelType} type Channel type.
 	 * @param {Track[]} tracks Tracks.
 	 * @param {number[]} sequence Sequence.
 	 */
-	constructor(type: string, tracks: Track[] = [], sequence: number[] = []) {
-		this.type     = type;
-		this.tracks   = tracks;
-		this.sequence = sequence;
+	constructor(type: ChannelType = ChannelType.Null, instrument: Instrument = new Instrument(), tracks: Track[] = [], sequence: number[] = []) {
+		this.type       = type;
+		this.instrument = new Instrument();
+		this.tracks     = tracks;
+		this.sequence   = sequence;
 	}
 }
 
@@ -266,42 +688,9 @@ export class Music {
 			data.beatsPerMinute
 		);
 		
-		// Loop through channels...
+		// Loop through channels and create channels...
 		for(const channelData of data.channels) {
-			const channel: Channel = new Channel(channelData.type);
-
-			// Push sequence data to channel, they are being subtracted by one in order
-			// to match their respective track indexes...
-			for(const sequence of channelData.sequence) {
-				channel.sequence.push(sequence - 1);
-			}
-
-			// Instrument and patterns.
-			const instrument: ExportInstrument = channelData.instruments[0];
-			const patterns  : ExportPattern[]  = channelData.patterns;
-
-			// Loop through patterns...
-			for(const pattern of patterns) {
-				const notes: ExportNote[] = pattern.notes;
-				const track: Track        = new Track();
-
-				// Loop through notes...
-				for(const note of notes) {
-					const pitch   : number = note.pitches[0];
-					const start   : number = note.points[0].tick;
-					const end     : number = note.points[1].tick;
-					const duration: number = end - start;
-
-					// Create a new tone and include it into track:
-					const tone: Tone = new Tone(pitch, start, end, duration);
-					track.tones.push(tone);
-				}
-
-				// Include track into channel:
-				channel.tracks.push(track);
-			}
-
-			// Include channel into music:
+			const channel: Channel = Channel.from(channelData);
 			music.channels.push(channel);
 		}
 
@@ -331,16 +720,20 @@ export class Music {
 	emit(): void {
 		// Loop through channels...
 		for(const channel of this.channels) {
+			const _a = [];
 
 			// Loop through tracks, but only if they're within the bars...
 			for(let index: number = 0; index < this.loopBars; index += 1) {
-				const track: Track = channel.tracks[this.introBars + index];
-				
+				const trackIndex: number = this.introBars + index;
+				const track     : Track  = channel.tracks[trackIndex];
+
 				// Loop through tones...
 				for(const tone of track.tones) {
-
+					
 				}
 			}
 		}
 	}
 }
+
+//#endregion </index.ts>
