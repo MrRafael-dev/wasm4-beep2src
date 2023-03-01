@@ -351,6 +351,12 @@ export enum InstrumentEffect {
 /** Tone's ArrayBuffer size. */
 const TONE_BUFFER_SIZE: number = 3;
 
+/** Track's ArrayBuffer size dedicated to header. */
+const TRACK_BUFFER_HEADER_SIZE: number = 1;
+
+/** Instrument's ArrayBuffer size. */
+const INSTRUMENT_BUFFER_SIZE: number = 2;
+
 /**
  * @class Tone
  * 
@@ -407,7 +413,7 @@ export class Tone {
 	 * Returns an binary representation of this object.
 	 * 
 	 * Data structure has a fixed size of 3 bytes.
-	 * Starting/ending points are not included.
+	 * Only starting point, pitch and duration are included.
 	 * ```
 	 * {
 	 *   start   : u8;
@@ -486,12 +492,12 @@ export class Track {
 	 */
 	toArrayBuffer(): ArrayBuffer {
 		// Declare a byte array and set the item length:
-		const size : number     = 1 + (this.tones.length * TONE_BUFFER_SIZE);
+		const size : number     = TRACK_BUFFER_HEADER_SIZE + (this.tones.length * TONE_BUFFER_SIZE);
 		const array: Uint8Array = new Uint8Array(size);
 					array[0] = this.tones.length;
 
 		// Insertion offset:
-		let offset: number = 1;
+		let offset: number = TRACK_BUFFER_HEADER_SIZE;
 
 		// Iterate through tones...
 		for(const tone of this.tones) {
@@ -572,6 +578,30 @@ export class Instrument {
 		this.chorus     = chorus;
 		this.effect     = effect;
 	}
+
+	/**
+	 * Returns an binary representation of this object.
+	 * 
+	 * Data structure has a fixed size of 2 bytes.
+	 * Only type and volume are included.
+	 * 
+	 * ```
+	 * {
+	 *   type  : u8;
+	 *   volume: u8;
+	 * }
+	 * ```
+	 * 
+	 * @returns {ArrayBuffer}
+	 */
+	toArrayBuffer(): ArrayBuffer {
+		const array: Uint8Array = new Uint8Array([
+			this.type,
+			this.volume,
+		]);
+
+		return array.buffer;
+	}
 }
 
 /**
@@ -639,7 +669,7 @@ export class Channel {
 	 */
 	constructor(type: ChannelType = ChannelType.Null, instrument: Instrument = new Instrument(), tracks: Track[] = [], sequence: number[] = []) {
 		this.type       = type;
-		this.instrument = new Instrument();
+		this.instrument = instrument;
 		this.tracks     = tracks;
 		this.sequence   = sequence;
 	}
